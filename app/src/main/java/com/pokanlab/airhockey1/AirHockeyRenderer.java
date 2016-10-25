@@ -54,15 +54,19 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
                 //triangle fan
                 0f, 0f, 1f, 1f, 1f,
                 -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
+                0f, -0.5f, 0.7f, 0.7f, 0.7f,
                 0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
+                0.5f, 0f, 0.7f, 0.7f, 0.7f,
                 0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
+                0f, 0.5f, 0.7f, 0.7f, 0.7f,
                 -0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
+                -0.5f, 0f, 0.7f, 0.7f, 0.7f,
                 -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
 
 
                 //line 1
                 -0.5f, 0f, 1f, 0f, 0f,
-                0.5f, 0f, 1f, 0f, 0f,
+                0.5f, 0f, 0f, 0f, 0f,
                 //Mallets
                 0f, -0.25f, 0f, 0f, 1f,
                 0f, 0.25f, 1f, 0f, 1f,
@@ -129,16 +133,16 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl10) {
         glClear(GL_COLOR_BUFFER_BIT);
         //draw board
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 10);
 
         //draw line
-        glDrawArrays(GL_LINES, 6, 2);
+        glDrawArrays(GL_LINES, 10, 2);
 
         //draw the first mallet blue.
-        glDrawArrays(GL_POINTS, 8, 1);
+        glDrawArrays(GL_POINTS, 12, 1);
 
         //draw the second mallet red.
-        glDrawArrays(GL_POINTS, 9, 1);
+        glDrawArrays(GL_POINTS, 13, 1);
 
         //draw the puck black.
 //        glUniform4f(uColorLocation, 0.0f, 1.0f, 1.0f, 1.0f);
