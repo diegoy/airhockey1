@@ -2,6 +2,7 @@ package com.pokanlab.airhockey1;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 
 import com.pokanlab.airhockey1.util.LoggerConfig;
 import com.pokanlab.airhockey1.util.ShaderHelper;
@@ -28,6 +29,7 @@ import static android.opengl.GLES20.glEnableVertexAttribArray;
 import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetUniformLocation;
 import static android.opengl.GLES20.glUniform4f;
+import static android.opengl.GLES20.glUniformMatrix4fv;
 import static android.opengl.GLES20.glUseProgram;
 import static android.opengl.GLES20.glVertexAttribPointer;
 import static android.opengl.GLES20.glViewport;
@@ -40,6 +42,8 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
     private static final int BYTES_PER_FLOAT = 4;
     private static final String A_POSITION = "a_Position";
     private static final String A_COLOR = "a_Color";
+    private static final String U_MATRIX = "u_Matrix";
+    private final float[] projectionMatrix = new float[16];
     private static final int COLOR_COMPONENT_COUNT = 3;
     private static final int STRIDE = (POSITION_COMPONENT_COUNT + COLOR_COMPONENT_COUNT) * BYTES_PER_FLOAT;
     private final FloatBuffer vertexData;
@@ -47,29 +51,26 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
     private int program;
     private int aPositionLocation;
     private int aColorLocation;
+    private int uMatrixLocation;
 
     public AirHockeyRenderer(Context context) {
         this.context = context;
         float[] tableVerticesWithTriangles = {
                 //triangle fan
                 0f, 0f, 1f, 1f, 1f,
-                -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
-                0f, -0.5f, 0.7f, 0.7f, 0.7f,
-                0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
-                0.5f, 0f, 0.7f, 0.7f, 0.7f,
-                0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
-                0f, 0.5f, 0.7f, 0.7f, 0.7f,
-                -0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
-                -0.5f, 0f, 0.7f, 0.7f, 0.7f,
-                -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
+                -0.5f, -0.8f, 0.7f, 0.7f, 0.7f,
+                0.5f, -0.8f, 0.7f, 0.7f, 0.7f,
+                0.5f, 0.8f, 0.7f, 0.7f, 0.7f,
+                -0.5f, 0.8f, 0.7f, 0.7f, 0.7f,
+                -0.5f, -0.8f, 0.7f, 0.7f, 0.7f,
 
 
                 //line 1
                 -0.5f, 0f, 1f, 0f, 0f,
                 0.5f, 0f, 0f, 0f, 0f,
                 //Mallets
-                0f, -0.25f, 0f, 0f, 1f,
-                0f, 0.25f, 1f, 0f, 1f,
+                0f, -0.4f, 0f, 0f, 1f,
+                0f, 0.4f, 1f, 0f, 1f,
 //                //puck
 //                0f, 0f,
 //                //borders
@@ -111,6 +112,7 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
 
         aColorLocation = glGetAttribLocation(program, A_COLOR);
         aPositionLocation = glGetAttribLocation(program, A_POSITION);
+        uMatrixLocation = glGetUniformLocation(program, U_MATRIX);
 
         vertexData.position(0);
         glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GL_FLOAT,
@@ -127,22 +129,33 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
         // set the opengl viewport to fill the entire surface
         glViewport(0, 0, width, height);
+        final float aspectRatio = width > height ?
+                (float) width / (float) height :
+                (float) height / (float) width;
+        if (width > height) {
+            //landscape
+            Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f);
+        } else {
+            //portrait or square
+            Matrix.orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f);
+        }
     }
 
     @Override
     public void onDrawFrame(GL10 gl10) {
         glClear(GL_COLOR_BUFFER_BIT);
+        glUniformMatrix4fv(uMatrixLocation, 1, false, projectionMatrix, 0);
         //draw board
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 10);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
 
         //draw line
-        glDrawArrays(GL_LINES, 10, 2);
+        glDrawArrays(GL_LINES, 6, 2);
 
         //draw the first mallet blue.
-        glDrawArrays(GL_POINTS, 12, 1);
+        glDrawArrays(GL_POINTS, 8, 1);
 
         //draw the second mallet red.
-        glDrawArrays(GL_POINTS, 13, 1);
+        glDrawArrays(GL_POINTS, 9, 1);
 
         //draw the puck black.
 //        glUniform4f(uColorLocation, 0.0f, 1.0f, 1.0f, 1.0f);
