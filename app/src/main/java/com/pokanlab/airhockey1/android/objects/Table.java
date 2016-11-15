@@ -3,6 +3,7 @@ package com.pokanlab.airhockey1.android.objects;
 import android.opengl.GLES20;
 
 import com.pokanlab.airhockey1.android.data.VertexArray;
+import com.pokanlab.airhockey1.android.programs.TextureShaderProgram;
 
 import static com.pokanlab.airhockey1.android.Constants.BYTES_PER_FLOAT;
 
